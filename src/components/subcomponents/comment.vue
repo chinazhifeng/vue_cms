@@ -6,30 +6,48 @@
         <mt-button type="primary" size="large">发表评论</mt-button>
 
         <div class="cmt-list">
-            <div class="cmt-item">
+            <div class="cmt-item" v-for="(item,i) in comments" :key="item.add_time">
                 <div class="cmt-title">
-                    第1楼用户xxxxx
+                    第{{i+1}}楼&nbsp;&nbsp;用户{{item.user_name}}&nbsp;&nbsp;发表时间:{{item.add_time|dateFormat}}
                 </div>
                 <div class="cmt-body">
-                    hhhhhhhhhhhhh
-                </div>
-            </div>
-            <div class="cmt-item">
-                <div class="cmt-title">
-                    第1楼用户xxxxx
-                </div>
-                <div class="cmt-body">
-                    hhhhhhhhhhhhh
+                    {{item.content==="undefined"?'没用评论':item.content}}
                 </div>
             </div>
         </div>
-        <mt-button type="danger" size="large" plain>加载更多</mt-button>
+        <mt-button type="danger" size="large" plain @click="getMore">加载更多</mt-button>
     </div>
 </template>
 
 <script>
+import { Toast } from "mint-ui";
 export default {
-    
+    data(){
+        return{
+            pageIndex:1,
+            comments:[]
+        }
+    },
+    created(){
+        this.getComments();
+    },
+    methods:{
+        getComments(){
+            this.$http.get("api/getcomments/"+this.id+"?pageindex="+this.pageIndex).then(result=>{
+                if(result.body.status===0){
+                    /* this.comments=result.body.message; */
+                    this.comments=this.comments.concat(result.body.message)
+                }else{
+                    Toast("评论获取失败")
+                }
+            })
+        },
+        getMore(){
+        this.pageIndex++;
+        this.getComments();
+    }
+    },
+    props:["id"]
 }
 </script>
 
